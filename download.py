@@ -17,7 +17,9 @@ readline.parse_and_bind("tab: complete")
 readline.set_completer(completer)
 
 # Setup optional arguments
-parser = argparse.ArgumentParser(description="Download albums and playlists from Deezer")
+parser = argparse.ArgumentParser(
+    description="Download albums and playlists from Deezer"
+)
 parser.add_argument("--arl", default="", help="Auth token for deezer account")
 parser.add_argument("--url", default="", help="URL to deezer album/playlist")
 parser.add_argument("--downdir", default="", help="Download folder for mp3 files")
@@ -38,7 +40,7 @@ if "playlist" in url:
     tracks = dz.get_playlist_tracks(url_id)
 elif "album" in url:
     tracks = dz.get_album_tracks(url_id)
-   
+
 print("Got tracks from", tracks[0]["ART_NAME"], "-", tracks[0]["ALB_TITLE"])
 
 # Download tracks

@@ -18,10 +18,14 @@ readline.parse_and_bind("tab: complete")
 readline.set_completer(completer)
 
 # Setup optional arguments
-parser = argparse.ArgumentParser(description="Convert mp3 files to m4b and add chapters and cover")
+parser = argparse.ArgumentParser(
+    description="Convert mp3 files to m4b and add chapters and cover"
+)
 parser.add_argument("--inputdir", default="", help="Input directory")
 parser.add_argument("--asin", default="", help="Audible book id")
-parser.add_argument("--intro", default=False, help="Does book have 'This is Audible' at start?")
+parser.add_argument(
+    "--intro", default=False, help="Does book have 'This is Audible' at start?"
+)
 parser.add_argument("--keep", default=True, help="Keep mp3 files after processing")
 
 args = parser.parse_args()
@@ -96,7 +100,7 @@ cmd = (
     f'ffmpeg -i "{m4b_chapterized}" -i "{cover_file}" '
     "-map 0:0 -map 1:0 "
     '-id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" '
-    "-c:v libx265 "
+    "-c:v libx264 "
     f'-y "{m4b_file}"'
 )
 sp.run(cmd, shell=True)
