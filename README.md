@@ -5,7 +5,6 @@ Series of script to help with audiobook related activities.
 ## Scripts
 
 - **chapterize.py** - Adds chapters to m4b file from audible audiobook id
-- **download-deezer.py** - Downloads albums/playlists from deezer
 - **golden-audio.py** - Downloads audiobooks from goldenaudiobooks.com, hdaudiobooks.com, etc.
 
 ## Alternate Downloading Methods
