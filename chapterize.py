@@ -1,10 +1,17 @@
+from urllib.request import urlopen, Request
 import subprocess as sp
 import argparse
-import requests
 import readline
 import glob
+import json
 import os
 import re
+
+
+# Makes web requests
+def get(url: str):
+    req = Request(url, headers={"User-Agent": "Totally not a bot"})
+    return urlopen(req).read()
 
 
 # Setup path autocomplete
@@ -21,10 +28,13 @@ readline.set_completer(completer)
 parser = argparse.ArgumentParser(
     description="Convert mp3 files to m4b and add chapters and cover"
 )
-parser.add_argument("--inputdir", default="", help="Input directory")
+parser.add_argument("-i", "--inputdir", default="", help="Input directory")
 parser.add_argument("--asin", default="", help="Audible book id")
 parser.add_argument(
-    "--intro", default=False, help="Does book have 'This is Audible' at start?"
+    "--intro",
+    default=False,
+    help="Does book have 'This is Audible' at start?",
+    type=bool,
 )
 parser.add_argument("--keep", default=True, help="Keep mp3 files after processing")
 
@@ -54,17 +64,17 @@ sp.run(
 asin = args.asin or input("Audible ID: ")
 
 url = f"https://api.audnex.us/books/{asin}/chapters"
-res = requests.get(url)
-chapters = res.json()["chapters"]
+res = get(url).decode("utf-8")
+chapters = json.loads(res)["chapters"]
 
 # Get book cover from audible api
 url = f"https://api.audnex.us/books/{asin}"
-res = requests.get(url)
-cover_url = res.json()["image"]
+res = get(url).decode("utf-8")
+cover_url = json.loads(res)["image"]
 
 cover_file = os.path.join(folder, "cover.jpg")
 with open(cover_file, "wb") as f:
-    f.write(requests.get(cover_url).content)
+    f.write(get(cover_url))
 
 # Add chapter buffer if intro not present
 has_intro = args.intro or (input("Has intro? (y/n): ").lower() == "y")
