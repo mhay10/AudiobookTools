@@ -16,14 +16,17 @@ Series of scripts and links to help with audiobook related activities.
 - [LibreVox](http://librivox.org/search) (best for public domain)
 - Your local library (best option for all of them)
   - For CD audiobooks, you can rip them to mp3 using [Exact Audio Copy](https://www.exactaudiocopy.de/en/)
+  
+## Android Apps - Copy audiobook files to your phone to listen
 
-## Hosting options
+- [Musicolet](https://play.google.com/store/apps/details?id=in.krosbits.musicolet&hl=en_US&gl=US)
+- [Pulsar](https://play.google.com/store/apps/details?id=com.rhmsoft.pulsar&hl=en_US&gl=US)
+- [BlackPlayer](https://play.google.com/store/apps/details?id=com.musicplayer.blackplayerfree&hl=en_US&gl=US)
+
+## Hosting options - For streaming to multiple devices
 
 - [AudiobookShelf](https://github.com/advplyr/audiobookshelf) - Self-hosted audiobook and podcast server (my personal favorite)
   - Has mobile app and website for listening
-- [AudiobookSuite](https://gitlab.com/Shrimperator/AudiobookSuite) - Local player and library for Windows systems
-  - Uses VLC for playback so compatability is almost garunteed
 - [Booksonic-Air](https://github.com/popeen/Booksonic-Air) - Self-hosted audiobook server based on Airsonic
   - No iOS app available for Booksonic specific features
   - Any Subsonic compatible app should work
-  
