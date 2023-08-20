@@ -37,7 +37,7 @@ output = args.output or input("Output folder: ")
 os.makedirs(output, exist_ok=True)
 
 # Get track urls
-url = re.sub(r"^https", "http", args.url or input("Audiobook URL: "))
+url = args.url or input("Audiobook URL: ")
 html = get(url).decode("utf-8")
 tracks = re.findall(r'(?<=<a href=")https://ipaudio\.club/.*?(?=">)', html)
 

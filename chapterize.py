@@ -45,7 +45,8 @@ args = parser.parse_args()
 glob_path = args.inputdir or input("Path to mp3 files: ")
 
 mp3_files = glob.glob(glob_path + "/*.mp3")
-mp3_files.sort(key=lambda f: int(re.findall(r"\d+", os.path.basename(f))[-2]))
+if len(mp3_files) > 1:
+    mp3_files.sort(key=lambda f: int(re.findall(r"\d+", os.path.basename(f))[-2]))
 
 folder = os.path.dirname(mp3_files[0]) or "./"
 m4b_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.m4b"))
