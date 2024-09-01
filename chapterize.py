@@ -42,9 +42,13 @@ args = parser.parse_args()
 
 
 # Converts mp3 files to m4b
-glob_path = args.inputdir or input("Path to mp3 files: ")
+glob_path = args.inputdir or input("Path to audio files: ")
 
-mp3_files = glob.glob(glob_path + "/*.mp3")
+mp3_files = glob.glob(f"{glob_path}/*.mp3")
+mp3_files += glob.glob(f"{glob_path}/*.m4b")
+mp3_files += glob.glob(f"{glob_path}/*.aac")
+mp3_files += glob.glob(f"{glob_path}/*.m4a")
+mp3_files += glob.glob(f"{glob_path}/*.wav")
 if len(mp3_files) > 1:
     mp3_files.sort(key=lambda f: int(re.findall(r"\d+", os.path.basename(f))[-2]))
 

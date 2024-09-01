@@ -39,7 +39,7 @@ os.makedirs(output, exist_ok=True)
 # Get track urls
 url = args.url or input("Audiobook URL: ")
 html = get(url).decode("utf-8")
-tracks = re.findall(r'(?<=<a href=")https://ipaudio\.club/.*?(?=">)', html)
+tracks = re.findall(r'(?<=<a href=")https://ipaudio.*?/.*?mp3(?=">)', html)
 
 # Download tracks
 for i, track in enumerate(tracks):
