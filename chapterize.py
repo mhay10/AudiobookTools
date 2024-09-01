@@ -63,6 +63,7 @@ with open(input_file, "w") as f:
 
 sp.run(
     f'ffmpeg -f concat -safe 0 -i "{input_file}" -vn -acodec aac -ab 112000 -ar 44100 -y "{m4b_file}"',
+    shell=True,
 )
 
 # Get chapters from audible api
