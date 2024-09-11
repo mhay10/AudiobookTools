@@ -36,7 +36,7 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "--keep", default=True, help="Keep mp3 files after processing", action="store_true"
+    "--keep", default=False, help="Keep mp3 files after processing", action="store_true"
 )
 
 args = parser.parse_args()
