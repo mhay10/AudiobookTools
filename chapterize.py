@@ -23,7 +23,6 @@ def completer(text, state):
 readline.set_completer_delims("\t")
 readline.parse_and_bind("tab: complete")
 readline.set_completer(completer)
-
 # Setup optional arguments
 parser = argparse.ArgumentParser(
     description="Convert mp3 files to m4b and add chapters and cover"
@@ -34,9 +33,11 @@ parser.add_argument(
     "--intro",
     default=False,
     help="Does book have 'This is Audible' at start?",
-    type=bool,
+    action="store_true",
 )
-parser.add_argument("--keep", default=True, help="Keep mp3 files after processing")
+parser.add_argument(
+    "--keep", default=True, help="Keep mp3 files after processing", action="store_true"
+)
 
 args = parser.parse_args()
 
