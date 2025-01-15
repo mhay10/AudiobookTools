@@ -23,6 +23,7 @@ def completer(text, state):
 readline.set_completer_delims("\t")
 readline.parse_and_bind("tab: complete")
 readline.set_completer(completer)
+
 # Setup optional arguments
 parser = argparse.ArgumentParser(
     description="Convert mp3 files to m4b and add chapters and cover"
@@ -41,7 +42,6 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-
 # Converts mp3 files to m4b
 glob_path = args.inputdir or input("Path to audio files: ")
 
@@ -55,6 +55,9 @@ if len(mp3_files) > 1:
 
 folder = os.path.dirname(mp3_files[0]) or "./"
 m4b_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.m4b"))
+temp_m4b_file = os.path.abspath(
+    os.path.join(folder, f"{os.path.basename(folder)}_temp.m4b")
+)
 
 input_file = os.path.abspath(os.path.join(folder, "input.txt"))
 with open(input_file, "w") as f:
@@ -62,19 +65,14 @@ with open(input_file, "w") as f:
         mp3_file = mp3_file.replace("'", "'\\''")
         f.write(f"file '{os.path.abspath(mp3_file)}'\n")
 
-sp.run(
-    f'ffmpeg -f concat -safe 0 -i "{input_file}" -vn -acodec aac -ab 112000 -ar 44100 -y "{m4b_file}"',
-    shell=True,
-)
-
-# Get chapters from audible api
+# Get chapters from Audible API
 asin = args.asin or input("Audible ID: ")
 
 url = f"https://api.audnex.us/books/{asin}/chapters"
 res = get(url).decode("utf-8")
 chapters = json.loads(res)["chapters"]
 
-# Get book cover from audible api
+# Get book cover from Audible API
 url = f"https://api.audnex.us/books/{asin}"
 res = get(url).decode("utf-8")
 cover_url = json.loads(res)["image"]
@@ -87,7 +85,7 @@ with open(cover_file, "wb") as f:
 has_intro = args.intro or (input("Has intro? (y/n): ").lower() == "y")
 buffer = 0 if has_intro else 4000
 
-# Convert chapters into txt
+# Convert chapters into metadata format
 chapters_file = os.path.join(folder, "chapters.txt")
 with open(chapters_file, "w") as f:
     for i, chapter in enumerate(chapters):
@@ -103,30 +101,32 @@ with open(chapters_file, "w") as f:
             f"title={title}\n\n"
         )
 
-# Add chapters to m4b
-m4b_chapterized = os.path.abspath(os.path.splitext(m4b_file)[0] + "_chapterized.m4b")
-cmd = (
-    f'ffmpeg -i "{m4b_file}" -f ffmetadata -i "{chapters_file}" '
-    "-map 0:a -map_chapters 1 -map_metadata 1 "
-    f'-acodec copy -y "{m4b_chapterized}"'
+# First command: Combine audio and chapters
+cmd_audio = (
+    f'ffmpeg -f concat -safe 0 -i "{input_file}" '
+    f'-f ffmetadata -i "{chapters_file}" '
+    f"-map 0:a -map_chapters 1 -map_metadata 1 "
+    f'-metadata title="{os.path.basename(folder)}" '
+    f"-c:a aac -b:a 112k -ar 44100 "
+    f'-y "{temp_m4b_file}"'
 )
-sp.run(cmd, shell=True)
+sp.run(cmd_audio, shell=True)
 
-# Add cover to m4b
-cmd = (
-    f'ffmpeg -i "{m4b_chapterized}" -i "{cover_file}" '
+# Second command: Add cover image
+cmd_cover = (
+    f'ffmpeg -i "{temp_m4b_file}" -i "{cover_file}" '
     "-map 0:0 -map 1:0 "
     '-id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" '
     "-c:v libx264 "
     f'-y "{m4b_file}"'
 )
-sp.run(cmd, shell=True)
-
+sp.run(cmd_cover, shell=True)
 # Cleanup
-os.remove(m4b_chapterized)
+
 os.remove(chapters_file)
 os.remove(cover_file)
 os.remove(input_file)
+os.remove(temp_m4b_file)
 
 remove_mp3 = (not args.keep) or (input("Remove mp3 files? (y/n): ").lower() == "y")
 if remove_mp3:
