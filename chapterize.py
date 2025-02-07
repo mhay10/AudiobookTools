@@ -102,27 +102,41 @@ with open(chapters_file, "w") as f:
         )
 
 # First command: Combine audio and chapters
-cmd_audio = (
-    f'ffmpeg -f concat -safe 0 -i "{input_file}" '
-    f'-f ffmetadata -i "{chapters_file}" '
-    f"-map 0:a -map_chapters 1 -map_metadata 1 "
-    f'-metadata title="{os.path.basename(folder)}" '
-    f"-c:a aac -b:a 112k -ar 44100 "
-    f'-y "{temp_m4b_file}"'
-)
-sp.run(cmd_audio, shell=True)
+# cmd_audio = (
+#     f'ffmpeg -f concat -safe 0 -i "{input_file}" '
+#     f'-f ffmetadata -i "{chapters_file}" '
+#     f"-map 0:a -map_chapters 1 -map_metadata 1 "
+#     f'-metadata title="{os.path.basename(folder)}" '
+#     f"-c:a aac -b:a 112k -ar 44100 "
+#     f'-y "{temp_m4b_file}"'
+# )
+# sp.run(cmd_audio, shell=True)
 
-# Second command: Add cover image
-cmd_cover = (
-    f'ffmpeg -i "{temp_m4b_file}" -i "{cover_file}" '
-    "-map 0:0 -map 1:0 "
-    '-id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" '
-    "-c:v libx264 "
-    f'-y "{m4b_file}"'
+# # Second command: Add cover image
+# cmd_cover = (
+#     f'ffmpeg -i "{temp_m4b_file}" -i "{cover_file}" '
+#     "-map 0:0 -map 1:0 "
+#     '-id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" '
+#     "-c:v libx264 "
+#     f'-y "{m4b_file}"'
+# )
+# sp.run(cmd_cover, shell=True)
+
+cmd_combined = (
+    f'ffmpeg -f concat -safe 0 -i "{input_file}" '  # Concatenate audio files
+    f'-f ffmetadata -i "{chapters_file}" '  # Metadata file for chapters
+    f'-i "{cover_file}" '  # Cover image
+    f"-map 0:a -map_chapters 1 -map_metadata 1 "  # Use audio stream, chapters, and metadata
+    f"-map 2:v "  # Use the cover image as video stream
+    f'-metadata title="{os.path.basename(folder)}" '  # Set metadata title
+    f"-c:a aac -b:a 112k -ar 44100 "  # Audio encoding settings
+    "-c:v libx264 "  # Encode cover image as video
+    '-id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" '  # Cover metadata
+    f'-y "{m4b_file}"'  # Output file
 )
-sp.run(cmd_cover, shell=True)
+sp.run(cmd_combined, shell=True)
+
 # Cleanup
-
 os.remove(chapters_file)
 os.remove(cover_file)
 os.remove(input_file)
