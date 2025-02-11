@@ -82,8 +82,7 @@ with open(cover_file, "wb") as f:
     f.write(get(cover_url))
 
 # Add chapter buffer if intro not present
-has_intro = args.intro or (input("Has intro? (y/n): ").lower() == "y")
-buffer = 0 if has_intro else 4000
+buffer = 0 if args.intro else 4000
 
 # Convert chapters into metadata format
 chapters_file = os.path.join(folder, "chapters.txt")
@@ -101,27 +100,7 @@ with open(chapters_file, "w") as f:
             f"title={title}\n\n"
         )
 
-# First command: Combine audio and chapters
-# cmd_audio = (
-#     f'ffmpeg -f concat -safe 0 -i "{input_file}" '
-#     f'-f ffmetadata -i "{chapters_file}" '
-#     f"-map 0:a -map_chapters 1 -map_metadata 1 "
-#     f'-metadata title="{os.path.basename(folder)}" '
-#     f"-c:a aac -b:a 112k -ar 44100 "
-#     f'-y "{temp_m4b_file}"'
-# )
-# sp.run(cmd_audio, shell=True)
-
-# # Second command: Add cover image
-# cmd_cover = (
-#     f'ffmpeg -i "{temp_m4b_file}" -i "{cover_file}" '
-#     "-map 0:0 -map 1:0 "
-#     '-id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" '
-#     "-c:v libx264 "
-#     f'-y "{m4b_file}"'
-# )
-# sp.run(cmd_cover, shell=True)
-
+# Combine audio, metadata, and cover into M4B file
 cmd_combined = (
     f'ffmpeg -f concat -safe 0 -i "{input_file}" '  # Concatenate audio files
     f'-f ffmetadata -i "{chapters_file}" '  # Metadata file for chapters
@@ -140,9 +119,7 @@ sp.run(cmd_combined, shell=True)
 os.remove(chapters_file)
 os.remove(cover_file)
 os.remove(input_file)
-os.remove(temp_m4b_file)
 
-remove_mp3 = (not args.keep) or (input("Remove mp3 files? (y/n): ").lower() == "y")
-if remove_mp3:
+if not args.keep:
     for mp3_file in mp3_files:
         os.remove(mp3_file)
