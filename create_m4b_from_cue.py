@@ -6,6 +6,14 @@ import os
 import re
 
 
+# Natural sort function
+def natural_sort(lst):
+    def sort_key(key):
+        return [int(c) if c.isdigit() else c.lower() for c in re.split(r"(\d+)", key)]
+
+    return sorted(lst, key=sort_key)
+
+
 # Setup path autocomplete
 def completer(text, state):
     line = readline.get_line_buffer().split()
@@ -18,10 +26,10 @@ readline.set_completer(completer)
 
 # Setup optional arguments
 parser = argparse.ArgumentParser(
-    description="Merges all mp3 files and a cue sheet into a m4b audiobook"
+    description="Merges all audio files and a cue sheet into a m4b audiobook"
 )
 parser.add_argument("-i", "--inputdir", default="", help="Input directory")
-parser.add_argument("-c", "--cue", default="", help="Cue sheet")
+parser.add_argument("-c", "--cue", default="", help="Input CUE sheet")
 parser.add_argument(
     "--keep",
     default=False,
@@ -34,22 +42,22 @@ args = parser.parse_args()
 # Convert mp3 files to m4b
 glob_path = args.inputdir or input("Path to audio files: ")
 
-mp3_files = glob.glob(f"{glob_path}/*.mp3")
-mp3_files += glob.glob(f"{glob_path}/*.m4b")
-mp3_files += glob.glob(f"{glob_path}/*.aac")
-mp3_files += glob.glob(f"{glob_path}/*.m4a")
-mp3_files += glob.glob(f"{glob_path}/*.wav")
-if len(mp3_files) > 1:
-    mp3_files.sort(key=lambda f: int(re.findall(r"\d+", os.path.basename(f))[-2]))
+audio_files = glob.glob(f"{glob_path}/*.mp3")
+audio_files += glob.glob(f"{glob_path}/*.m4b")
+audio_files += glob.glob(f"{glob_path}/*.aac")
+audio_files += glob.glob(f"{glob_path}/*.m4a")
+audio_files += glob.glob(f"{glob_path}/*.wav")
 
-folder = os.path.dirname(mp3_files[0]) or "./"
+audio_files = natural_sort(audio_files)
+
+folder = os.path.dirname(audio_files[0]) or "./"
 m4b_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.m4b"))
 
 input_file = os.path.abspath(os.path.join(folder, "input.txt"))
 with open(input_file, "w") as f:
-    for mp3_file in mp3_files:
-        mp3_file = mp3_file.replace("'", "'\\''")
-        f.write(f"file '{os.path.abspath(mp3_file)}'\n")
+    for audio_file in audio_files:
+        audio_file = audio_file.replace("'", "'\\''")
+        f.write(f"file '{os.path.abspath(audio_file)}'\n")
 
 cmd = (
     f'ffmpeg -f concat -safe 0 -i "{input_file}" '
@@ -96,7 +104,8 @@ with open(chapter_file, "w") as f:
                 f.write("[CHAPTER]\n")
                 f.write("TIMEBASE=1/1000\n")
                 f.write(f"START={prev_start}\n")
-                f.write(f"END={start - 1}\n\n")
+                f.write(f"END={start - 1}\n")
+                f.write(f"title=Chapter {chapter_count}\n\n")
 
                 # Prepare for next iteration
                 prev_start = start
@@ -104,11 +113,11 @@ with open(chapter_file, "w") as f:
                 chapter_count += 1
 
     # # Output last chapter
-    # f.write("[CHAPTER]\n")
-    # f.write("TIMEBASE=1/1000\n")
-    # f.write(f"START={prev_start}\n")
-    # f.write("END=-1\n")
-    # f.write(f"title={prev_title}\n")
+    f.write("[CHAPTER]\n")
+    f.write("TIMEBASE=1/1000\n")
+    f.write(f"START={prev_start}\n")
+    f.write("END=-1\n")
+    f.write(f"title=Chapter {chapter_count}\n\n")
 
 # Add chapters to m4b
 m4b_chapterized = os.path.abspath(os.path.splitext(m4b_file)[0] + "_chapterized.m4b")
@@ -118,3 +127,10 @@ cmd = (
     f'-acodec copy -y "{m4b_chapterized}"'
 )
 sp.run(cmd, shell=True)
+
+# Cleanup
+os.remove(chapter_file)
+
+if not args.keep:
+    os.remove(input_file)
+    os.remove(m4b_file)

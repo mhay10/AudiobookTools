@@ -8,6 +8,14 @@ import os
 import re
 
 
+# Natural sort function
+def natural_sort(lst):
+    def sort_key(key):
+        return [int(c) if c.isdigit() else c.lower() for c in re.split(r"(\d+)", key)]
+
+    return sorted(lst, key=sort_key)
+
+
 # Makes web requests
 def get(url: str):
     req = Request(url, headers={"User-Agent": "Totally not a bot"})
@@ -26,7 +34,7 @@ readline.set_completer(completer)
 
 # Setup optional arguments
 parser = argparse.ArgumentParser(
-    description="Convert mp3 files to m4b and add chapters and cover using Audible API"
+    description="Convert audio files to m4b and add chapters and cover using Audible API"
 )
 parser.add_argument("-i", "--inputdir", default="", help="Input directory")
 parser.add_argument("--asin", default="", help="Audible book id")
@@ -42,18 +50,18 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-# Converts mp3 files to m4b
+# Converts audio files to m4b
 glob_path = args.inputdir or input("Path to audio files: ")
 
-mp3_files = glob.glob(f"{glob_path}/*.mp3")
-mp3_files += glob.glob(f"{glob_path}/*.m4b")
-mp3_files += glob.glob(f"{glob_path}/*.aac")
-mp3_files += glob.glob(f"{glob_path}/*.m4a")
-mp3_files += glob.glob(f"{glob_path}/*.wav")
-if len(mp3_files) > 1:
-    mp3_files.sort(key=lambda f: int(re.findall(r"\d+", os.path.basename(f))[-2]))
+audio_files = glob.glob(f"{glob_path}/*.mp3")
+audio_files += glob.glob(f"{glob_path}/*.m4b")
+audio_files += glob.glob(f"{glob_path}/*.aac")
+audio_files += glob.glob(f"{glob_path}/*.m4a")
+audio_files += glob.glob(f"{glob_path}/*.wav")
 
-folder = os.path.dirname(mp3_files[0]) or "./"
+audio_files = natural_sort(audio_files)
+
+folder = os.path.dirname(audio_files[0]) or "./"
 m4b_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.m4b"))
 temp_m4b_file = os.path.abspath(
     os.path.join(folder, f"{os.path.basename(folder)}_temp.m4b")
@@ -61,9 +69,9 @@ temp_m4b_file = os.path.abspath(
 
 input_file = os.path.abspath(os.path.join(folder, "input.txt"))
 with open(input_file, "w") as f:
-    for mp3_file in mp3_files:
-        mp3_file = mp3_file.replace("'", "'\\''")
-        f.write(f"file '{os.path.abspath(mp3_file)}'\n")
+    for audio_file in audio_files:
+        audio_file = audio_file.replace("'", "'\\''")
+        f.write(f"file '{os.path.abspath(audio_file)}'\n")
 
 # Get chapters from Audible API
 asin = args.asin or input("Audible ID: ")
@@ -121,5 +129,5 @@ os.remove(cover_file)
 os.remove(input_file)
 
 if not args.keep:
-    for mp3_file in mp3_files:
-        os.remove(mp3_file)
+    for audio_file in audio_files:
+        os.remove(audio_file)
