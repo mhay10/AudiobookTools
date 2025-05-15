@@ -34,7 +34,7 @@ readline.set_completer(completer)
 
 # Setup optional arguments
 parser = argparse.ArgumentParser(
-    description="Convert audio files to m4b and add chapters and cover using Audible API"
+    description="Convert audio files to an m4b audiobook and add chapters and cover using the Audible API"
 )
 parser.add_argument("-i", "--inputdir", default="", help="Input directory")
 parser.add_argument("--asin", default="", help="Audible book id")
@@ -63,9 +63,6 @@ audio_files = natural_sort(audio_files)
 
 folder = os.path.dirname(audio_files[0]) or "./"
 m4b_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.m4b"))
-temp_m4b_file = os.path.abspath(
-    os.path.join(folder, f"{os.path.basename(folder)}_temp.m4b")
-)
 
 input_file = os.path.abspath(os.path.join(folder, "input.txt"))
 with open(input_file, "w") as f:
@@ -93,7 +90,7 @@ with open(cover_file, "wb") as f:
 buffer = 0 if args.intro else 4000
 
 # Convert chapters into metadata format
-chapters_file = os.path.join(folder, "chapters.txt")
+chapters_file = os.path.abspath(os.path.join(folder, "chapters.txt"))
 with open(chapters_file, "w") as f:
     for i, chapter in enumerate(chapters):
         title = chapter["title"]

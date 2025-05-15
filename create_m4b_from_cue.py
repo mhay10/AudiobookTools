@@ -26,14 +26,14 @@ readline.set_completer(completer)
 
 # Setup optional arguments
 parser = argparse.ArgumentParser(
-    description="Merges all audio files and a cue sheet into a m4b audiobook"
+    description="Merges all audio files and a cue file into a m4b audiobook"
 )
 parser.add_argument("-i", "--inputdir", default="", help="Input directory")
-parser.add_argument("-c", "--cue", default="", help="Input CUE sheet")
+parser.add_argument("-c", "--cue", default="", help="Input CUE file")
 parser.add_argument(
     "--keep",
     default=False,
-    help="Keep audio files and cue sheet after processing",
+    help="Keep audio files and cue file after processing",
     action="store_true",
 )
 
@@ -59,78 +59,57 @@ with open(input_file, "w") as f:
         audio_file = audio_file.replace("'", "'\\''")
         f.write(f"file '{os.path.abspath(audio_file)}'\n")
 
+# Get chapters from CUE file
+cue_file = os.path.abspath(args.cue or input("Path to CUE file: "))
+with open(cue_file, "r") as f:
+    chapters = []
+    tracks = re.split(r"(?=TRACK)", f.read())
+    for track in tracks:
+        if "TRACK" in track:
+            lines = track.splitlines()
+            chapter = {}
+            for line in lines:
+                if "TRACK" in line:
+                    chapter["track"] = line.split()[1]
+                if "TITLE" in line:
+                    chapter["title"] = line.split('"')[1]
+                if "INDEX 01" in line:
+                    mm, ss, ff = map(int, line.split()[2].split(":"))
+                    chapter["start"] = mm * 60 + ss + ff / 75
+
+            chapters.append(chapter)
+
+# Create chapters file
+chapters_file = os.path.abspath(os.path.join(folder, "chapters.txt"))
+with open(chapters_file, "w") as f:
+    for i, chapter in enumerate(chapters):
+        title = chapter["title"]
+        start_time = chapter["start"]
+
+        f.write(
+            "[CHAPTER]\n"
+            "TIMEBASE=1/1000\n"
+            f"START={int(start_time * 1000)}\n"
+            f"END={int(start_time * 1000)}\n"
+            f"title={title}\n\n"
+        )
+
+# Combine audio and chapters into M4B file
 cmd = (
     f'ffmpeg -f concat -safe 0 -i "{input_file}" '
-    f'-vn -acodec aac -ab 112000 -ar 44100 -y "{m4b_file}"',
-)
-sp.run(cmd, shell=True)
-
-# Get chapters from cue sheet
-cue_file = args.cue or input("Path to cue sheet: ")
-with open(cue_file, "r") as f:
-    cue_lines = f.readlines()
-
-# Convert chapters into txt
-chapter_file = os.path.abspath(os.path.join(folder, "chapters.txt"))
-with open(chapter_file, "w") as f:
-    chapter_count = 0
-    prev_start = 0
-    track_line = False
-    title = ""
-    prev_title = ""
-
-    for line in cue_lines:
-        # Check for TRACK line
-        if "TRACK" in line:
-            track_line = True
-            continue
-
-        # Extract title
-        if "TITLE" in line and track_line:
-            title = line.split('"')[1]
-            track_line = False
-
-        # Parse INDEX 01 line
-        if "INDEX 01" in line and title:
-            # Parse time (minutes:seconds:frames)
-            _, time = line.split()
-            t = time.split(":")
-            start = (
-                (int(t[0]) * 60 * 1000) + (int(t[1]) * 1000) + (int(t[2]) * 1000 // 75)
-            )
-
-            # If not first track, output previous chapter
-            if chapter_count > 0:
-                f.write("[CHAPTER]\n")
-                f.write("TIMEBASE=1/1000\n")
-                f.write(f"START={prev_start}\n")
-                f.write(f"END={start - 1}\n")
-                f.write(f"title=Chapter {chapter_count}\n\n")
-
-                # Prepare for next iteration
-                prev_start = start
-                prev_title = title
-                chapter_count += 1
-
-    # # Output last chapter
-    f.write("[CHAPTER]\n")
-    f.write("TIMEBASE=1/1000\n")
-    f.write(f"START={prev_start}\n")
-    f.write("END=-1\n")
-    f.write(f"title=Chapter {chapter_count}\n\n")
-
-# Add chapters to m4b
-m4b_chapterized = os.path.abspath(os.path.splitext(m4b_file)[0] + "_chapterized.m4b")
-cmd = (
-    f'ffmpeg -i "{m4b_file}" -f ffmetadata -i "{chapter_file}" '
+    f'-f ffmetadata -i "{chapters_file}" '
     "-map 0:a -map_chapters 1 -map_metadata 1 "
-    f'-acodec copy -y "{m4b_chapterized}"'
+    f'-metadata title="{os.path.basename(folder)}" '
+    "-c:a aac -b:a 112k -ar 44100 "
+    f'-y "{m4b_file}"'
 )
 sp.run(cmd, shell=True)
 
 # Cleanup
-os.remove(chapter_file)
+os.remove(chapters_file)
+os.remove(input_file)
 
 if not args.keep:
-    os.remove(input_file)
-    os.remove(m4b_file)
+    for audio_file in audio_files:
+        os.remove(audio_file)
+    os.remove(cue_file)

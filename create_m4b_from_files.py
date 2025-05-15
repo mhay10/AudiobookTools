@@ -37,7 +37,7 @@ readline.set_completer(completer)
 
 # Setup optional arguments
 parser = argparse.ArgumentParser(
-    description="Creates a cue sheet using each audio file as a chapter"
+    description="Creates an m4b audiobook from split audio files where each file is a chapter"
 )
 parser.add_argument("-i", "--inputdir", default="", help="Input directory")
 parser.add_argument(
@@ -61,26 +61,48 @@ audio_files += glob.glob(f"{glob_path}/*.wav")
 audio_files = natural_sort(audio_files)
 
 folder = os.path.dirname(audio_files[0]) or "./"
-cue_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.cue"))
+m4b_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.m4b"))
 
-# Convert audio files to cue sheet
-with open(cue_file, "w") as f:
-    f.write(f'TITLE "{os.path.basename(folder)}"\n\n')
+input_file = os.path.abspath(os.path.join(folder, "input.txt"))
+with open(input_file, "w") as f:
+    for audio_file in audio_files:
+        audio_file = audio_file.replace("'", "'\\''")
+        f.write(f"file '{os.path.abspath(audio_file)}'\n")
 
+# Create chapters file
+chapters_file = os.path.abspath(os.path.join(folder, "chapters.txt"))
+with open(chapters_file, "w") as f:
     total_duration = 0
     for i, audio_file in enumerate(audio_files):
-        # Get file info
-        filename = os.path.basename(audio_file)
+        title = f"Chapter {i + 1}"
+        start_time = 0 if i == 0 else total_duration
         duration = get_duration(audio_file)
-        start_time = f"{int(total_duration // 3600):02d}:{int((total_duration % 3600) // 60):02d}:{int(total_duration % 60):02d}"
-        print(
-            f"Chapter {i+1}: {filename} - Duration: {duration:.2f}s - Start Time: {start_time}"
+
+        f.write(
+            "[CHAPTER]\n"
+            "TIMEBASE=1/1000\n"
+            f"START={int(start_time * 1000)}\n"
+            f"END={int((start_time + duration) * 1000)}\n"
+            f"title={title}\n\n"
         )
 
-        # Write chapter info to cue sheet
-        f.write(f"TRACK {i+1} AUDIO\n")
-        f.write(f'  TITLE "Chapter {i+1}"\n')
-        f.write(f"  INDEX 01 {start_time}\n\n")
-
-        # Update total duration
         total_duration += duration
+
+# Combine audio and chapters into M4B file
+cmd = (
+    f'ffmpeg -f concat -safe 0 -i "{input_file}" '
+    f'-f ffmetadata -i "{chapters_file}" '
+    "-map 0:a -map_chapters 1 -map_metadata 1 "
+    f'-metadata title="{os.path.basename(folder)}" '
+    "-c:a aac -b:a 112k -ar 44100 "
+    f'-y "{m4b_file}"'
+)
+sp.run(cmd, shell=True)
+
+# Cleanup
+os.remove(chapters_file)
+os.remove(input_file)
+
+if not args.keep:
+    for audio_file in audio_files:
+        os.remove(audio_file)
