@@ -4,7 +4,7 @@ A set of scripts and links to help with audiobook-related activities.
 
 ## Scripts
 
-- **add_metadata_to_m4b.py** - Gets metadata from Audible and Google Books and adds it to the audibook
+- **add_metadata_to_m4b.py** - Gets metadata from Audible and Google Books and adds it to the audiobook
 - **create_m4b_from_asin.py** - Creates an audiobook with chapter data and a cover image taken from Audible
 - **create_m4b_from_cue.py** - Creates an audiobook with chapter data taken from a CUE file
 - **create_m4b_from_files.py** - Creates an audiobook where each file is a chapter
