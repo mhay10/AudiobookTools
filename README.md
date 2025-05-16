@@ -1,12 +1,12 @@
 # AudiobookTools
 
-A set of scripts and links to help with audiobook related activities.
+A set of scripts and links to help with audiobook-related activities.
 
 ## Scripts
 
-- **create_m4b_from_asin.py** - Merges audio files into an M4B audiobook with chapter data and a cover image taken from Audible
-- **create_m4b_from_cue.py** - Merges audio files into an M4B audiobook with chapters data taken from a CUE file
-- **create_m4b_from_files.py** - Merges audio files into an M4B audiobook with each file is a chapter
+- **create_m4b_from_asin.py** - Creates an audiobook with chapter data and a cover image taken from Audible
+- **create_m4b_from_cue.py** - Creates an audiobook with chapter data taken from a CUE file
+- **create_m4b_from_files.py** - Creates an audiobook where each file is a chapter
 - **dl_golden_audio.py** - Downloads audiobooks from goldenaudiobooks.com, hdaudiobooks.net, etc.
 
 ## Other Downloading Tools
@@ -17,7 +17,7 @@ A set of scripts and links to help with audiobook related activities.
 - [Audiobook Bay](https://audiobookbay.net) (best torrent site)
 - [LibreVox](http://librivox.org/search) (best for public domain)
 - Your local library (best option for all of them)
-  - For CD audiobooks, you can rip them to mp3 using [Exact Audio Copy](https://www.exactaudiocopy.de/en/)
+  - For CD audiobooks, you can rip them to MP3 using [Exact Audio Copy](https://www.exactaudiocopy.de/en/)
 
 ## Android Apps - Copy audiobook files to your phone to listen
 
@@ -28,7 +28,7 @@ A set of scripts and links to help with audiobook related activities.
 ## Hosting options - For streaming to multiple devices
 
 - [AudiobookShelf](https://github.com/advplyr/audiobookshelf) - Self-hosted audiobook and podcast server (my personal favorite)
-  - Has mobile app and website for listening
+  - Has a mobile app and website for listening
 - [Booksonic-Air](https://github.com/popeen/Booksonic-Air) - Self-hosted audiobook server based on Airsonic
-  - No iOS app available for Booksonic specific features
-  - Any Subsonic compatible app should work
+  - No iOS app available for Booksonic's specific features
+  - Any Subsonic-compatible app should work
