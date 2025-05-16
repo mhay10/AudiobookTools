@@ -36,22 +36,29 @@ readline.set_completer(completer)
 parser = argparse.ArgumentParser(
     description="Convert audio files to an m4b audiobook and add chapters and cover using the Audible API"
 )
-parser.add_argument("-i", "--inputdir", default="", help="Input directory")
-parser.add_argument("--asin", default="", help="Audible book id")
+parser.add_argument(
+    "-i", "--inputdir", default="", help="Input directory", required=True
+)
+parser.add_argument("--asin", default="", help="Audible book id", required=True)
 parser.add_argument(
     "--intro",
     default=False,
     help="Does book have 'This is Audible' at start?",
     action="store_true",
+    required=True,
 )
 parser.add_argument(
-    "--keep", default=False, help="Keep mp3 files after processing", action="store_true"
+    "--keep",
+    default=False,
+    help="Keep mp3 files after processing",
+    action="store_true",
+    required=True,
 )
 
 args = parser.parse_args()
 
 # Converts audio files to m4b
-glob_path = args.inputdir or input("Path to audio files: ")
+glob_path = args.inputdir
 
 audio_files = glob.glob(f"{glob_path}/*.mp3")
 audio_files += glob.glob(f"{glob_path}/*.m4b")
@@ -61,7 +68,7 @@ audio_files += glob.glob(f"{glob_path}/*.wav")
 
 audio_files = natural_sort(audio_files)
 
-folder = os.path.dirname(audio_files[0]) or "./"
+folder = os.path.dirname(audio_files[0])
 m4b_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.m4b"))
 
 input_file = os.path.abspath(os.path.join(folder, "input.txt"))
@@ -71,7 +78,7 @@ with open(input_file, "w") as f:
         f.write(f"file '{os.path.abspath(audio_file)}'\n")
 
 # Get chapters from Audible API
-asin = args.asin or input("Audible ID: ")
+asin = args.asin
 
 url = f"https://api.audnex.us/books/{asin}/chapters"
 res = get(url).decode("utf-8")
@@ -82,7 +89,7 @@ url = f"https://api.audnex.us/books/{asin}"
 res = get(url).decode("utf-8")
 cover_url = json.loads(res)["image"]
 
-cover_file = os.path.join(folder, "cover.jpg")
+cover_file = os.path.abspath(os.path.join(folder, "cover.jpg"))
 with open(cover_file, "wb") as f:
     f.write(get(cover_url))
 
@@ -118,7 +125,7 @@ cmd_combined = (
     '-id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" '  # Cover metadata
     f'-y "{m4b_file}"'  # Output file
 )
-sp.run(cmd_combined, shell=True)
+sp.run(cmd_combined, shell=True, check=True)
 
 # Cleanup
 os.remove(chapters_file)

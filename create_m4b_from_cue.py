@@ -103,7 +103,7 @@ cmd = (
     "-c:a aac -b:a 112k -ar 44100 "
     f'-y "{m4b_file}"'
 )
-sp.run(cmd, shell=True)
+sp.run(cmd, shell=True, check=True)
 
 # Cleanup
 os.remove(chapters_file)
