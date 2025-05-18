@@ -1,7 +1,6 @@
 from urllib.request import urlopen, Request
 import subprocess as sp
 import argparse
-import readline
 import glob
 import json
 import os
@@ -22,16 +21,6 @@ def get(url: str):
     return urlopen(req).read()
 
 
-# Setup path autocomplete
-def completer(text, state):
-    line = readline.get_line_buffer().split()
-    return [x for x in glob.glob(text + "*")][state]
-
-
-readline.set_completer_delims("\t")
-readline.parse_and_bind("tab: complete")
-readline.set_completer(completer)
-
 # Setup optional arguments
 parser = argparse.ArgumentParser(
     description="Convert audio files to an m4b audiobook and add chapters and cover using the Audible API"
@@ -45,20 +34,18 @@ parser.add_argument(
     default=False,
     help="Does book have 'This is Audible' at start?",
     action="store_true",
-    required=True,
 )
 parser.add_argument(
     "--keep",
     default=False,
     help="Keep mp3 files after processing",
     action="store_true",
-    required=True,
 )
 
 args = parser.parse_args()
 
 # Converts audio files to m4b
-glob_path = args.inputdir
+glob_path = os.path.abspath(args.inputdir)
 
 audio_files = glob.glob(f"{glob_path}/*.mp3")
 audio_files += glob.glob(f"{glob_path}/*.m4b")
@@ -79,7 +66,6 @@ with open(input_file, "w") as f:
 
 # Get chapters from Audible API
 asin = args.asin
-
 url = f"https://api.audnex.us/books/{asin}/chapters"
 res = get(url).decode("utf-8")
 chapters = json.loads(res)["chapters"]
@@ -119,10 +105,8 @@ cmd_combined = (
     f'-i "{cover_file}" '  # Cover image
     f"-map 0:a -map_chapters 1 -map_metadata 1 "  # Use audio stream, chapters, and metadata
     f"-map 2:v "  # Use the cover image as video stream
-    f'-metadata title="{os.path.basename(folder)}" '  # Set metadata title
     f"-c:a aac -b:a 112k -ar 44100 "  # Audio encoding settings
     "-c:v libx264 "  # Encode cover image as video
-    '-id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" '  # Cover metadata
     f'-y "{m4b_file}"'  # Output file
 )
 sp.run(cmd_combined, shell=True, check=True)

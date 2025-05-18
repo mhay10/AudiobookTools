@@ -1,6 +1,5 @@
 import subprocess as sp
 import argparse
-import readline
 import glob
 import os
 import re
@@ -14,22 +13,14 @@ def natural_sort(lst):
     return sorted(lst, key=sort_key)
 
 
-# Setup path autocomplete
-def completer(text, state):
-    line = readline.get_line_buffer().split()
-    return [x for x in glob.glob(text + "*")][state]
-
-
-readline.set_completer_delims("\t")
-readline.parse_and_bind("tab: complete")
-readline.set_completer(completer)
-
 # Setup optional arguments
 parser = argparse.ArgumentParser(
     description="Merges all audio files and a cue file into a m4b audiobook"
 )
-parser.add_argument("-i", "--inputdir", default="", help="Input directory")
-parser.add_argument("-c", "--cue", default="", help="Input CUE file")
+parser.add_argument(
+    "-i", "--inputdir", default="", help="Input directory", required=True
+)
+parser.add_argument("-c", "--cue", default="", help="Input CUE file", required=True)
 parser.add_argument(
     "--keep",
     default=False,
@@ -40,7 +31,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Convert mp3 files to m4b
-glob_path = args.inputdir or input("Path to audio files: ")
+glob_path = os.path.abspath(args.inputdir)
 
 audio_files = glob.glob(f"{glob_path}/*.mp3")
 audio_files += glob.glob(f"{glob_path}/*.m4b")
@@ -60,7 +51,7 @@ with open(input_file, "w") as f:
         f.write(f"file '{os.path.abspath(audio_file)}'\n")
 
 # Get chapters from CUE file
-cue_file = os.path.abspath(args.cue or input("Path to CUE file: "))
+cue_file = os.path.abspath(args.cue)
 with open(cue_file, "r") as f:
     chapters = []
     tracks = re.split(r"(?=TRACK)", f.read())
@@ -98,8 +89,6 @@ with open(chapters_file, "w") as f:
 cmd = (
     f'ffmpeg -f concat -safe 0 -i "{input_file}" '
     f'-f ffmetadata -i "{chapters_file}" '
-    "-map 0:a -map_chapters 1 -map_metadata 1 "
-    f'-metadata title="{os.path.basename(folder)}" '
     "-c:a aac -b:a 112k -ar 44100 "
     f'-y "{m4b_file}"'
 )

@@ -2,8 +2,6 @@ from urllib.request import Request, urlopen
 from urllib.parse import urlencode
 import subprocess as sp
 import argparse
-import readline
-import glob
 import json
 import re
 import os
@@ -96,16 +94,6 @@ def get(url: str):
     req = Request(url, headers={"User-Agent": "Totally not a bot"})
     return urlopen(req).read()
 
-
-# Setup path autocomplete
-def completer(text, state):
-    line = readline.get_line_buffer().split()
-    return [x for x in glob.glob(text + "*")][state]
-
-
-readline.set_completer_delims("\t")
-readline.parse_and_bind("tab: complete")
-readline.set_completer(completer)
 
 # Setup optional arguments
 parser = argparse.ArgumentParser(

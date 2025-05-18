@@ -1,6 +1,5 @@
 import subprocess as sp
 import argparse
-import readline
 import glob
 import os
 import re
@@ -25,21 +24,13 @@ def get_duration(file):
     return float(result.stdout.strip())
 
 
-# Setup path autocomplete
-def completer(text, state):
-    line = readline.get_line_buffer().split()
-    return [x for x in glob.glob(text + "*")][state]
-
-
-readline.set_completer_delims("\t")
-readline.parse_and_bind("tab: complete")
-readline.set_completer(completer)
-
 # Setup optional arguments
 parser = argparse.ArgumentParser(
     description="Creates an m4b audiobook from split audio files where each file is a chapter"
 )
-parser.add_argument("-i", "--inputdir", default="", help="Input directory")
+parser.add_argument(
+    "-i", "--inputdir", default="", help="Input directory", required=True
+)
 parser.add_argument(
     "--keep",
     default=False,
@@ -93,7 +84,6 @@ cmd = (
     f'ffmpeg -f concat -safe 0 -i "{input_file}" '
     f'-f ffmetadata -i "{chapters_file}" '
     "-map 0:a -map_chapters 1 -map_metadata 1 "
-    f'-metadata title="{os.path.basename(folder)}" '
     "-c:a aac -b:a 112k -ar 44100 "
     f'-y "{m4b_file}"'
 )
