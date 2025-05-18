@@ -5,6 +5,7 @@ A set of scripts and links to help with audiobook-related activities.
 ## Scripts
 
 - **add_metadata_to_m4b.py** - Gets metadata from Audible and Google Books and adds it to the audiobook
+- **add_chapters_from_silence.py** - Adds chapters to an audiobook by detecting silence in the audio file
 - **create_m4b_from_asin.py** - Creates an audiobook with chapter data and a cover image taken from Audible
 - **create_m4b_from_cue.py** - Creates an audiobook with chapter data taken from a CUE file
 - **create_m4b_from_files.py** - Creates an audiobook where each file is a chapter
@@ -18,7 +19,7 @@ A set of scripts and links to help with audiobook-related activities.
 - [Audiobook Bay](https://audiobookbay.net) (best torrent site)
 - [LibreVox](http://librivox.org/search) (best for public domain)
 - Your local library (best option for all of them)
-  - For CD audiobooks, you can rip them to MP3 using [Exact Audio Copy](https://www.exactaudiocopy.de/en/)
+  - For CD audiobooks, you can rip them to MP3 using Windows Media Player or similar software
 
 ## Android Apps - Copy audiobook files to your phone to listen
 
