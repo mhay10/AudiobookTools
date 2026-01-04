@@ -103,10 +103,12 @@ cmd_combined = (
     f'ffmpeg -f concat -safe 0 -i "{input_file}" '  # Concatenate audio files
     f'-f ffmetadata -i "{chapters_file}" '  # Metadata file for chapters
     f'-i "{cover_file}" '  # Cover image
-    f"-map 0:a -map_chapters 1 -map_metadata 1 "  # Use audio stream, chapters, and metadata
-    f"-map 2:v "  # Use the cover image as video stream
-    f"-c:a aac -b:a 112k -ar 44100 "  # Audio encoding settings
-    "-c:v libx264 "  # Encode cover image as video
+    "-map 0:a -map_chapters 1 -map_metadata 1 "  # Use audio stream, chapters, and metadata
+    "-map 2:v "  # Use the cover image as video stream
+    "-c:a aac -b:a 112k -ar 44100 "  # Audio encoding settings
+    "-c:v mjpeg "  # Encode cover image
+    "-threads 0"  # Use all available threads
+    "-movflags +faststart "  # Optimize for streaming
     f'-y "{m4b_file}"'  # Output file
 )
 sp.run(cmd_combined, shell=True, check=True)
