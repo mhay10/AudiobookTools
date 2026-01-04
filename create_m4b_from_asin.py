@@ -106,7 +106,8 @@ cmd_combined = (
     "-map 0:a -map_chapters 1 -map_metadata 1 "  # Use audio stream, chapters, and metadata
     "-map 2:v "  # Use the cover image as video stream
     "-c:a aac -b:a 112k -ar 44100 "  # Audio encoding settings
-    "-c:v mjpeg "  # Encode cover image
+    "-c:v png "  # Encode cover image
+    "-disposition:v:0 attached_pic "  # Mark cover as attached picture
     "-threads 0 "  # Use all available threads
     "-movflags +faststart "  # Optimize for streaming
     f'-y "{m4b_file}"'  # Output file
