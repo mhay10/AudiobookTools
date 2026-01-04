@@ -173,7 +173,9 @@ metadata_cmd = (
     f'-metadata composer="{metadata["narrators"]}" '
     f'-metadata comment="{metadata["description"]}" '
     f'-metadata date="{metadata["year"]}" '
-    "-c:v mjpeg -c:a copy "
+    "-c:v png -c:a copy "
+    "-disposition:v:0 attached_pic "
+    "-threads 0 "
     f'-y "{m4b_temp}"'
 )
 sp.run(metadata_cmd, shell=True, check=True)
