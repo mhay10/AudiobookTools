@@ -107,7 +107,8 @@ cmd_combined = (
     "-map 2:v "  # Use the cover image as video stream
     "-c:a aac -b:a 112k -ar 44100 "  # Audio encoding settings
     "-c:v mjpeg "  # Encode cover image
-    "-threads 0"  # Use all available threads
+    "-threads 0 "  # Use all available threads
+    "-movflags +faststart "  # Optimize for streaming
     f'-y "{m4b_file}"'  # Output file
 )
 sp.run(cmd_combined, shell=True, check=True)
