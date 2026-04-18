@@ -51,6 +51,7 @@ audio_files += glob.glob(f"{glob_path}/*.wav")
 
 audio_files = natural_sort(audio_files)
 
+# Create input file for ffmpeg concat
 folder = os.path.dirname(audio_files[0]) or "./"
 m4b_file = os.path.abspath(os.path.join(folder, f"{os.path.basename(folder)}.m4b"))
 
@@ -60,6 +61,9 @@ with open(input_file, "w") as f:
         audio_file = audio_file.replace("'", "'\\''")
         f.write(f"file '{os.path.abspath(audio_file)}'\n")
 
+# Get duration of each autio file
+durations = [get_duration(audio_file) for audio_file in audio_files]
+
 # Create chapters file
 chapters_file = os.path.abspath(os.path.join(folder, "chapters.txt"))
 with open(chapters_file, "w") as f:
@@ -67,7 +71,7 @@ with open(chapters_file, "w") as f:
     for i, audio_file in enumerate(audio_files):
         title = f"Chapter {i + 1}"
         start_time = 0 if i == 0 else total_duration
-        duration = get_duration(audio_file)
+        duration = durations[i]
 
         f.write(
             "[CHAPTER]\n"
