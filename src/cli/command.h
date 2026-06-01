@@ -10,10 +10,10 @@ public:
     void register_command(CLI::App &app) {
         auto *cmd = app.add_subcommand(name, description);
         add_options(cmd);
-        cmd->callback([this, cmd]() { run(cmd); });
+        cmd->callback([this, cmd]() { run(); });
     }
 
-    virtual void run(CLI::App *cmd) = 0;
+    virtual void run() = 0;
 
     virtual ~Command() = default;
 

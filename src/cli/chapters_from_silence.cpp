@@ -2,6 +2,6 @@
 
 #include "fmt/base.h"
 
-void ChaptersFromSilence::run(CLI::App *cmd) {
+void ChaptersFromSilence::run() {
     fmt::println("ChaptersFromSilence called");
 }

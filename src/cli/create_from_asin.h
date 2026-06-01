@@ -10,5 +10,5 @@ public:
     ) {
     }
 
-    void run(CLI::App *cmd) override;
+    void run() override;
 };

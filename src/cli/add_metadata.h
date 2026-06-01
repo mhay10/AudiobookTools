@@ -22,5 +22,5 @@ public:
         cmd->add_option("--narrators", narrators, "Narrator/s of book")->delimiter(',');
     };
 
-    void run(CLI::App *cmd) override;
+    void run() override;
 };
