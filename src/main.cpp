@@ -1,6 +1,9 @@
-#include <iostream>
+#include "cli/cli.h"
 
-int main() {
-  std::cout << "Hello world!\n";
+int main(int argc, char **argv) {
+  Cli cli;
+  cli.register_commands();
+  cli.parse(argc, argv);
+
   return 0;
 }
