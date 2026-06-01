@@ -11,15 +11,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include(FetchContent)
 
 fetchcontent_declare(
-    CLI11
-    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
-    GIT_TAG v2.6.2
+        CLI11
+        GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+        GIT_TAG v2.6.2
 )
 
 fetchcontent_declare(
-    fmt
-    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG 12.1.0
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG 12.1.0
 )
 
 fetchcontent_makeavailable(CLI11)
@@ -41,6 +41,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 # ====================
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic>
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic>
+        $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
 )

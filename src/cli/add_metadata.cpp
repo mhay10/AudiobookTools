@@ -1,10 +1,11 @@
 #include "add_metadata.h"
 #include <fmt/base.h>
 
-void AddMetadata::register_command(CLI::App &cli) {
-  auto *subcommand = cli.add_subcommand("add_metadata", "Add metadata from Audible and Open Library to audiobook");
+#include "fmt/ranges.h"
 
-  subcommand->callback([subcommand]() {
-    fmt::print("Add metadata called");
-  });
+void AddMetadata::run(CLI::App *cmd) {
+    fmt::println("Input file: {}", input_file);
+    fmt::println("Title: {}", title);
+    fmt::println("Authors: {}", fmt::join(authors, ", "));
+    fmt::println("Narrators: {}", fmt::join(narrators, ", "));
 }
