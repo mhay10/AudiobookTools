@@ -1,21 +1,17 @@
 #include "add_metadata.h"
-#include <fmt/base.h>
+
+#include "bookinfo.h"
+#include "fmt/base.h"
 #include "fmt/ranges.h"
+#include "httplib.h"
 
 // Standardized book metadata
-struct BookInfo {
-    std::string title;
-    std::vector<std::string> authors;
-    std::vector<std::string> narrators;
-    std::string description;
-    std::string year;
-};
 
 // Helper function declarations
 namespace {
     std::string search_openlibrary_catalog(std::string title, std::vector<std::string> authors);
 
-    BookInfo get_openlibrary_data(std::string work);
+    // BookInfo get_openlibrary_data(std::string work);
 
     std::string search_audible_catalog(std::string title, std::vector<std::string> authors,
                                        std::vector<std::string> narrators);
@@ -60,6 +56,29 @@ void AddMetadata::run() {
 
 namespace {
     std::string search_openlibrary_catalog(std::string title, std::vector<std::string> authors) {
+        // API Url: https://openlibrary.org/search.json?q={}&limit=1
+        // q format: title:" " AND author:" " AND author:" " ...
+
+        // Build query string
+        std::stringstream ss;
+        ss << fmt::format("title:\"{}\"", title);
+        for (auto &author: authors) {
+            ss << fmt::format(" AND author:\"{}\"", author);
+        }
+        std::string query = ss.str();
+
+        fmt::println("Searching OpenLibrary with query: {}", query);
+
+        httplib::Client req("https://openlibrary.org");
+        httplib::Params params = {
+            {"q", query},
+            {"limit", "1"}
+        };
+        auto response = req.Get("/search.json", params, httplib::Headers{});
+        if (response && response->status == 200) {
+            fmt::println("{}", response->body);
+        }
+
         return "";
     }
 
@@ -68,11 +87,11 @@ namespace {
         return "";
     }
 
-    BookInfo get_openlibrary_data(std::string work) {
-        return {};
-    }
-
-    BookInfo get_audible_data(std::string asin) {
-        return {};
-    }
+    // BookInfo get_openlibrary_data(std::string work) {
+    //     return {};
+    // }
+    //
+    // BookInfo get_audible_data(std::string asin) {
+    //     return {};
+    // }
 }
