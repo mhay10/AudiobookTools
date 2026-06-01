@@ -39,15 +39,22 @@ void AddMetadata::run() {
      */
 
     std::string work = search_openlibrary_catalog(title, authors);
-    if (!work.empty()) {
+    bool found_in_openlibrary = !work.empty();
+    if (found_in_openlibrary) {
         fmt::println("Found book in OpenLibrary: {}", work);
         // TODO: Get book data from OpenLibrary
     }
 
     std::string asin = search_audible_catalog(title, authors, narrators);
-    if (!asin.empty()) {
+    bool found_in_audible = !asin.empty();
+    if (found_in_audible) {
         fmt::println("Found book in Audible: {}", asin);
         // TODO: Get book data from Audible
+    }
+
+    if (!found_in_audible && !found_in_openlibrary) {
+        fmt::println("No match found in OpenLibrary or Audible for: '{}' by '{}'", title, fmt::join(authors, ", "));
+        exit(1);
     }
 }
 
