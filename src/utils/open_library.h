@@ -4,10 +4,10 @@
 
 
 class OPL {
-    httplib::Client client{"https://openlibrary.org"};
+    inline static httplib::Client client{"https://openlibrary.org"};
 
 public:
-    std::string try_find_book(std::string title, std::vector<std::string> authors, int limit = 1);
+    static std::string try_find_book(std::string title, std::vector<std::string> authors);
 
-    BookInfo get_book_info(std::string work);
+    static BookInfo get_book_info(std::string work);
 };

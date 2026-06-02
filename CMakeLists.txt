@@ -49,7 +49,9 @@ fetchcontent_makeavailable(httplib)
 file(GLOB_RECURSE SOURCES src/*.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES}
         lib/bookinfo.h
-        src/utils/open_library.cpp)
+        src/utils/open_library.cpp
+        src/utils/audible.cpp
+        src/utils/audible.h)
 
 find_package(OpenSSL REQUIRED)
 target_compile_definitions(${PROJECT_NAME} PRIVATE CPPHTTPLIB_OPENSSL_SUPPORT)
