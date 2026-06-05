@@ -5,9 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if (WIN32)
-    add_compile_definitions(_WIN32_WINNT=0x0A00)
-endif ()
+set(CPR_USE_SYSTEM_CURL OFF)
+set(BUILD_SHARED_LIBS OFF)
 
 # ====================
 # Dependencies
@@ -33,15 +32,15 @@ fetchcontent_declare(
 )
 
 fetchcontent_declare(
-        httplib
-        GIT_REPOSITORY https://github.com/yhirose/cpp-httplib
-        GIT_TAG v0.46.1
+        cpr
+        GIT_REPOSITORY https://github.com/libcpr/cpr.git
+        GIT_TAG 1.14.2
 )
 
 fetchcontent_makeavailable(CLI11)
 fetchcontent_makeavailable(json)
 fetchcontent_makeavailable(fmt)
-fetchcontent_makeavailable(httplib)
+fetchcontent_makeavailable(cpr)
 
 # ====================
 # Sources and Executable
@@ -54,7 +53,7 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/utils/audible.h)
 
 find_package(OpenSSL REQUIRED)
-target_compile_definitions(${PROJECT_NAME} PRIVATE CPPHTTPLIB_OPENSSL_SUPPORT)
+target_compile_definitions(${PROJECT_NAME} INTERFACE CPPHTTPLIB_OPENSSL_SUPPORT)
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_include_directories(${PROJECT_NAME} PRIVATE lib)
@@ -62,12 +61,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE CLI11::CLI11)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
-target_link_libraries(${PROJECT_NAME} PRIVATE httplib::httplib OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
 
 # ====================
 # Compiler Options
 # ====================
 target_compile_options(${PROJECT_NAME} PRIVATE
-                $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic>
-                $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic>
+        $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
 )

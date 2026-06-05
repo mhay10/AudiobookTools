@@ -1,6 +1,7 @@
 #include "open_library.h"
 #include "nlohmann/json.hpp"
 #include "fmt/format.h"
+#include "cpr/cpr.h"
 
 using json = nlohmann::json;
 
@@ -14,16 +15,16 @@ std::string OPL::try_find_book(std::string title, std::vector<std::string> autho
     std::string query = ss.str();
 
     // Send API request for search results
-    httplib::Params params = {
+    cpr::Parameters params = {
         {"q", query},
         {"limit", "1"},
     };
-    auto response = client.Get("/search.json", params, httplib::Headers{});
+    auto response = cpr::Get(cpr::Url{OPENLIBRARY_API + "/search.json"}, params);
 
     // Try to parse work key from API response
     std::string work;
-    if (response && response->status == 200) {
-        json data = json::parse(response->body);
+    if (response.status_code == 200) {
+        json data = json::parse(response.text);
         if (data["num_found"] > 0) {
             std::string key = data["docs"][0]["key"];
             work = key.substr(key.find("/works/") + 7);
@@ -35,17 +36,17 @@ std::string OPL::try_find_book(std::string title, std::vector<std::string> autho
 
 BookInfo OPL::get_book_info(std::string work) {
     // Send API request for title, authors, and publish year
-    httplib::Params params = {
+    cpr::Parameters params = {
         {"q", fmt::format("/works/{}", work)},
         {"limit", "1"},
         {"fields", "title,author_name,first_publish_year"}
     };
-    auto response = client.Get("/search.json", params, httplib::Headers{});
+    auto response = cpr::Get(cpr::Url{OPENLIBRARY_API + "/search.json"}, params);
 
     // Put relevant data in standard format
     BookInfo info;
-    if (response && response->status == 200) {
-        json data = json::parse(response->body);
+    if (response.status_code == 200) {
+        json data = json::parse(response.text);
         if (data["num_found"] > 0) {
             auto doc = data["docs"][0];
             info.title = doc["title"].get<std::string>();
@@ -55,11 +56,11 @@ BookInfo OPL::get_book_info(std::string work) {
     }
 
     // Send API request for description
-    response = client.Get(fmt::format("/works/{}.json", work));
+    response = cpr::Get(cpr::Url{OPENLIBRARY_API + fmt::format("/works/{}.json", work)});
 
     // Add description to standard format
-    if (response && response->status == 200) {
-        json data = json::parse(response->body);
+    if (response.status_code == 200) {
+        json data = json::parse(response.text);
         if (data.contains("description")) {
             info.description = data["description"].get<std::string>();
         }

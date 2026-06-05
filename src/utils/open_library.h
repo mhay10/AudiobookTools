@@ -1,10 +1,9 @@
 #pragma once
-#include <httplib.h>
 #include "bookinfo.h"
 
 
 class OPL {
-    inline static httplib::Client client{"https://openlibrary.org"};
+    inline static const std::string OPENLIBRARY_API = "https://openlibrary.org";
 
 public:
     static std::string try_find_book(std::string title, std::vector<std::string> authors);

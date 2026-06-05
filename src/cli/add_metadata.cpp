@@ -2,7 +2,6 @@
 #include "bookinfo.h"
 #include "fmt/base.h"
 #include "fmt/ranges.h"
-#include "httplib.h"
 #include "utils/audible.h"
 #include "utils/open_library.h"
 
@@ -24,17 +23,32 @@ void AddMetadata::run() {
     BookInfo opl_info;
     std::string work = OPL::try_find_book(title, authors);
     if (!work.empty()) {
-        fmt::println("Found book in OpenLibrary: {}", work);
+        fmt::println("Found match in OpenLibrary: {}", work);
         opl_info = OPL::get_book_info(work);
+
+        fmt::println("==== OPENLIBRARY INFO ====");
+        fmt::println("Title: {}", opl_info.title);
+        fmt::println("Authors: {}", opl_info.authors);
+        fmt::println("Narrators: {}", opl_info.narrators);
+        fmt::println("Description: {}", opl_info.description);
+        fmt::println("Year: {}\n", opl_info.year);
     }
 
+    BookInfo audible_info;
     std::string asin = Audible::try_find_book(title, authors, narrators);
     if (!asin.empty()) {
-        fmt::println("Found book in Audible: {}", asin);
-        // TODO: Get book data from Audible
+        fmt::println("Found match in Audible: {}", asin);
+        audible_info = Audible::get_book_info(asin);
+
+        fmt::println("==== AUDIBLE INFO ====");
+        fmt::println("Title: {}", audible_info.title);
+        fmt::println("Authors: {}", audible_info.authors);
+        fmt::println("Narrators: {}", audible_info.narrators);
+        fmt::println("Description: {}", audible_info.description);
+        fmt::println("Year: {}\n", audible_info.year);
     }
 
-    if (work.empty() && asin.empty()) {
+    if (asin.empty()) {
         fmt::println("No match found in OpenLibrary or Audible for: '{}' by '{}'", title, fmt::join(authors, ", "));
         exit(1);
     }
